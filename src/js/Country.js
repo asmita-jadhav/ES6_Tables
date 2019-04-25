@@ -1,85 +1,70 @@
 let countries = ['France', 'Germany', 'England', 'Spain', 'Belgium', 'Italy', 'Portugal', 'Irland', 'Luxembourg'];
 
-import CountingDictionary from './CountingDictionary';
+import Dictionary from './Dictionary';
 
 class Country{
 
     constructor(){
-
-        let self=this;
-        this.countries==[];
-        this.message='';
-
-        let temp=CountingDictionary.load('https://jsonplaceholder.typicode.com/todos');
-        this.countries=temp.then(temp=>{temp.json});
         
-        //this.setData();
+        this.countries=[];
+        this.message='';
+        this.el = document.getElementById('countries');
 
-        if(this.countries !=undefined || this.countries!=null){
-                this.el = document.getElementById('countries');
-                this.fetchAll();
-                
+        document.getElementById('spiner').style.display='block';
+        let dataPromise=new Dictionary();
+        dataPromise.load('https://jsonplaceholder.typicode.com/todos').then(data => {
+            this.countries=data;
+                   
+            this.render();
+            document.getElementById('spiner').style.display='none';
 
-                document.querySelector('.btn-add-item').addEventListener('click', this.addCountry.bind(this));
-                document.querySelector('.btn-update-item').addEventListener('click', this.updateCountry.bind(this));
-            
-                document.addEventListener('click', event => {
-                if (!event.target) {
-                    return;
-                    }
-
-                    if (event.target.classList.contains('btn-delete-item')) {
-                        self.Delete(event);
-                    }
-                
-                    if (event.target.classList.contains('btn-edit-item')) {
-                        self.Edit(event);
-                    }
-            });
-        }else{
+            this.setEvent();
+        
+        });                   
+               
+        /*}else{
             this.message=`Countries count is ${ this.countries.length }`;
             document.getElementById("alertMessage").innerHTML=this.message;
-        }
+        }*/
     }
+        
 
-    setData(){    
-
-
-         fetch('https://jsonplaceholder.typicode.com/todos')
-        .then(response =>{
-            if(response.status==200){
-                response.json().then(data => {
-                    this.countries=data;
-                })
-                console.log(response);           
-            }
-        })      
-        .catch(error => console.error('Error:', error));
-    
-
-        /*var data=[];
-        const URL = `https://jsonplaceholder.typicode.com/todos`;
-        const fetchResult = fetch(URL)
-        const response = await fetchResult;
-        const jsonData = await response.json();
-        console.log(jsonData);
-
-        jsonData.map(item => { data.push(item.title);*/
-    }
-    
-    fetchAll(){
-        var data = '';
-        this.count();
+    setEvent(){
+        
         var self=this;
+
+        document.querySelector('.btn-add-item').addEventListener('click', this.addCountry.bind(this));
+        document.querySelector('.btn-update-item').addEventListener('click', this.updateCountry.bind(this));
+    
+        document.addEventListener('click', event => {
+        if (!event.target) {
+            return;
+            }
+
+            if (event.target.classList.contains('btn-delete-item')) {
+                self.Delete(event);
+            }
+        
+            if (event.target.classList.contains('btn-edit-item')) {
+                self.Edit(event);
+            }
+        });
+
+    }
+    
+    render(){
+        var data = '';
+        this.count();        
         if (this.countries.length > 0) {
             for (let i = 0; i < this.countries.length; i++) {
                 data += '<tr>';
-                data += '<td>' + this.countries[i] + '</td>';                
-                data += '<td><button class="btn-edit-item" data-id='+i+'>Edit</button></td>';
-                data += '<td><button class="btn-delete-item" data-id='+i+'>Delete</button></td>';
+                data += '<td>' + this.countries[i].key + '</td>';
+                data += '<td>' + this.countries[i].value + '</td>';                
+                data += '<td><button class="btn btn-warning btn-edit-item" data-id='+(this.countries[i].key-1)+'><span class="fa fa-pencil"></span></button></td>';
+                data += '<td><button class="btn btn-danger btn-delete-item" data-id='+(this.countries[i].key-1)+'><span class="fa fa-close"></span></button></td>';
                 data += '</tr>';
             }
-        }                
+        }                        
         return this.el.innerHTML = data;
     }
 
@@ -93,15 +78,18 @@ class Country{
 
         var el = document.getElementById('add-name');
         // Get the value
+        let countCountry=self.countries.length;
+        let newItemkey=(self.countries[countCountry-1].key + 1 );
+
         var country = el.value;
 
         if (country) {
             // Add the new value
-            this.countries.push(country.trim());
+            this.countries.push({key:newItemkey,value:country.trim()});
             // Reset input value
             el.value = '';
             // Dislay the new list
-            self.fetchAll();
+            self.render();
         }
     }
 
@@ -109,7 +97,7 @@ class Country{
         var el=document.getElementById("edit-name");        
         var item=e.target.getAttribute('data-id');
         el.setAttribute("data-id",item);
-        el.value=this.countries[item];
+        el.value=this.countries[item].value;
         document.getElementById('spoiler').style.display = 'block';        
     }
     updateCountry(){
@@ -119,11 +107,11 @@ class Country{
         var item=el.getAttribute('data-id');
         if (country) {
             // Edit value
-            self.countries.splice(item, 1, country.trim());
+            self.countries.splice(item, 1, {key:item+1,value:country.trim()});
             // Display the new list
-            self.fetchAll();
+            self.render();
             // Hide fields
-            self.CloseInput();
+            self.closeInput();
         }
     }
 
@@ -136,7 +124,7 @@ class Country{
 
         this.countries.splice(item, 1);
         // Display the new list
-        this.fetchAll();
+        this.render();
     }
     
 
