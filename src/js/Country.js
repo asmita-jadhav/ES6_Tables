@@ -1,33 +1,46 @@
 let countries = ['France', 'Germany', 'England', 'Spain', 'Belgium', 'Italy', 'Portugal', 'Irland', 'Luxembourg'];
 
 import Dictionary from './Dictionary';
+import '../scss/index.scss';
+import template from '../templates/template';
+import one from '../images/1.jpg';
 
 class Country{
 
     constructor(){
         
-        this.countries=[];
-        this.message='';
+        this.countries=new Dictionary();        
         this.el = document.getElementById('countries');
 
-        document.getElementById('spiner').style.display='block';
-        let dataPromise=new Dictionary();
-        dataPromise.load('https://jsonplaceholder.typicode.com/todos').then(data => {
-            this.countries=data;
-                   
-            this.render();
-            document.getElementById('spiner').style.display='none';
+        //document.getElementById('spiner').style.display='block';
 
+
+        this.loadData('https://jsonplaceholder.typicode.com/todos')               
+        .then(result=>{
+            this.countries.setData(result);
+            this.render();
             this.setEvent();
+        })
+        .catch(err=>{
+            this.message=err;
+            
+        });   ///put template literals;
+       document.getElementById('alertMessage').innerHTML=template;
+
+        let temp=document.getElementById("imageone");
         
-        });                   
-               
-        /*}else{
-            this.message=`Countries count is ${ this.countries.length }`;
-            document.getElementById("alertMessage").innerHTML=this.message;
-        }*/
+        temp.src=one;
+
+        
     }
-        
+       
+    async loadData(url){
+
+        let response=await fetch(url);
+        let countries=await response.json();
+        console.log(countries);
+        return countries;
+    }
 
     setEvent(){
         
@@ -54,23 +67,22 @@ class Country{
     
     render(){
         var data = '';
-        this.count();        
-        if (this.countries.length > 0) {
-            for (let i = 0; i < this.countries.length; i++) {
+        this.count();  
+        let items=this.countries.getData();      
+        for(let country of items){
                 data += '<tr>';
-                data += '<td>' + this.countries[i].key + '</td>';
-                data += '<td>' + this.countries[i].value + '</td>';                
-                data += '<td><button class="btn btn-warning btn-edit-item" data-id='+(this.countries[i].key-1)+'><span class="fa fa-pencil"></span></button></td>';
-                data += '<td><button class="btn btn-danger btn-delete-item" data-id='+(this.countries[i].key-1)+'><span class="fa fa-close"></span></button></td>';
+                data += '<td>' + country.key + '</td>';
+                data += '<td>' + country.value + '</td>';                
+                data += '<td><button class="btn btn-warning btn-edit-item" data-id='+(country.key-1)+'><span class="fa fa-pencil"></span></button></td>';
+                data += '<td><button class="btn btn-danger btn-delete-item" data-id='+(country.key-1)+'><span class="fa fa-close"></span></button></td>';
                 data += '</tr>';
-            }
-        }                        
+        }                              
         return this.el.innerHTML = data;
     }
 
     count(){
         this.counter = document.getElementById('counter');
-        this.counter.innerHTML=this.countries.length+" countries";
+        this.counter.innerHTML=this.countries.count()+" countries";
     }
     
     addCountry(){
@@ -78,8 +90,8 @@ class Country{
 
         var el = document.getElementById('add-name');
         // Get the value
-        let countCountry=self.countries.length;
-        let newItemkey=(self.countries[countCountry-1].key + 1 );
+        
+        let newItemkey=self.countries.count() + 1 ;
 
         var country = el.value;
 
@@ -88,6 +100,10 @@ class Country{
             this.countries.push({key:newItemkey,value:country.trim()});
             // Reset input value
             el.value = '';
+            document.getElementById('alertMessage').innerHTML=template({
+                avoid: 'var',
+                who: 'puppy'
+              });
             // Dislay the new list
             self.render();
         }
@@ -122,7 +138,7 @@ class Country{
     Delete(e){
          var item=e.target.getAttribute('data-id');
 
-        this.countries.splice(item, 1);
+        this.countries.deleteItem(item);
         // Display the new list
         this.render();
     }
