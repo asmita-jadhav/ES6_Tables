@@ -1,7 +1,7 @@
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebPackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
-const path = require("path");
 
 module.exports = {
   entry: ["./src/index.js"],
@@ -22,16 +22,18 @@ module.exports = {
         test: /\.html$/,
         use: [
           {
-            loader: "html-loader",
-            options: { minimize: true }
+            loader: "html-loader",            
+            query: {
+              interpolate: true
+            }
           }
         ]
       },
       {
-        test: /\.css/,
-        loaders: ['style', 'css'],
+        test: /\.css$/,
+        loaders: ['style!css'],
         include: __dirname + '/public'
-      },
+      },     
       {
         test: /\.(scss)$/,
         use: [{
@@ -51,7 +53,26 @@ module.exports = {
         }, {
           loader: 'sass-loader' // compiles Sass to CSS
         }]
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [{
+            loader: 'file-loader',
+            options: {
+                name: '[name].[ext]',
+                outputPath: 'fonts/'
+            }
+        }]
+    },{
+      test: /\.(png|gif|jp(e*)g|svg)$/,
+      use: {
+        loader: 'url-loader',
+        options: {
+          limit: 8000,
+          name: 'images/[hash]-[name].[ext]'
+        }
       }
+    }
     ]
   },
   plugins: [
