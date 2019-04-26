@@ -25,3 +25,9 @@ https://css-tricks.com/css-modules-part-2-getting-started/
 
 webpack config for babel and node packages
 https://itnext.io/how-to-write-a-frontend-javascript-plugin-using-es6-sass-webpack-a1c6d6fdeb71
+
+
+
+flex layout
+
+https://www.quackit.com/html/html_editors/scratchpad/?example=/css/flexbox/examples/flexbox_website_layout_2
